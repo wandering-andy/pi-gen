@@ -1,5 +1,4 @@
 IMG_NAME='test'
-RELEASE='bookworm'
 DEPLOY_COMPRESSION='none'
 LOCALE_DEFAULT='en_US.UTF-8'
 TARGET_HOSTNAME='testpi'
