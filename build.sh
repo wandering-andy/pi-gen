@@ -170,6 +170,11 @@ if [ -f config ]; then
 	source config
 fi
 
+if [ -f wifi-config ]; then
+	# shellcheck disable=SC1091
+	source wifi-config
+fi
+
 while getopts "c:" flag
 do
 	case "$flag" in
