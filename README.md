@@ -1,6 +1,6 @@
 # pi-gen
 
-Tool used to create Raspberry Pi OS images. (Previously known as Raspbian).
+Tool used to create custom Raspberry Pi OS images for my homelab.
 
 
 ## Dependencies
@@ -195,9 +195,7 @@ The following environment variables are supported:
    stays activated. `FIRST_USER_PASS` must be set for this to work. Please be aware of the implied
    security risk of defining a default username and password for your devices.
 
- * `WPA_ESSID`, `WPA_PASSWORD` and `WPA_COUNTRY` (Default: unset)
-
-   If these are set, they are use to configure `wpa_supplicant.conf`, so that the Raspberry Pi can automatically connect to a wireless network on first boot. If `WPA_ESSID` is set and `WPA_PASSWORD` is unset an unprotected wireless network will be configured. If set, `WPA_PASSWORD` must be between 8 and 63 characters. `WPA_COUNTRY` is a 2-letter ISO/IEC 3166 country Code, i.e. `GB`
+ * `WPA_COUNTRY` is a 2-letter ISO/IEC 3166 country Code, i.e. `GB`
 
  * `ENABLE_SSH` (Default: `0`)
 
@@ -225,6 +223,11 @@ The following environment variables are supported:
  * `STAGE_LIST` (Default: `stage*`)
 
     If set, then instead of working through the numeric stages in order, this list will be followed. For example setting to `"stage0 stage1 mystage stage2"` will run the contents of `mystage` before stage2. Note that quotes are needed around the list. An absolute or relative path can be given for stages outside the pi-gen directory.
+
+### Wifi-config
+* `WPA_ESSID`, `WPA_PASSWORD`
+
+   If these are set, they are use to configure `wpa_supplicant.conf`, so that the Raspberry Pi can automatically connect to a wireless network on first boot. If `WPA_ESSID` is set and `WPA_PASSWORD` is unset an unprotected wireless network will be configured. If set, `WPA_PASSWORD` must be between 8 and 63 characters.
 
 A simple example for building Raspbian:
 
@@ -335,9 +338,9 @@ and `--privileged` options are already set by the script and should not be redef
 
 ## Stage Anatomy
 
-### Raspbian Stage Overview
+### Raspberry Pi OS Stage Overview
 
-The build of Raspbian is divided up into several stages for logical clarity
+The build of Raspberry Pi OS is divided up into several stages for logical clarity
 and modularity.  This causes some initial complexity, but it simplifies
 maintenance and allows for more easy customization.
 
