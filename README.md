@@ -13,9 +13,7 @@ to use the Docker build described below.
 To install the required dependencies for `pi-gen` you should run:
 
 ```bash
-apt-get install coreutils quilt parted qemu-user-static debootstrap zerofree zip \
-dosfstools libarchive-tools libcap2-bin grep rsync xz-utils file git curl bc \
-qemu-utils kpartx gpg pigz
+sudo apt install --no-install-recommends -y coreutils quilt parted qemu-user-static debootstrap zerofree zip dosfstools libarchive-tools libcap2-bin grep rsync xz-utils file git curl bc qemu-utils kpartx gpg pigz
 ```
 
 The file `depends` contains a list of tools needed.  The format of this
@@ -27,7 +25,7 @@ Getting started is as simple as cloning this repository on your build machine. Y
 can do so with:
 
 ```bash
-git clone https://github.com/RPI-Distro/pi-gen.git
+git clone https://github.com/wandering-andy/pi-gen.git
 ```
 
 `--depth 1` can be added afer `git clone` to create a shallow clone, only containing
