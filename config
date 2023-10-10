@@ -1,4 +1,4 @@
-IMG_NAME='test'
+IMG_NAME='test_v0.3'
 DEPLOY_COMPRESSION='none'
 TARGET_HOSTNAME='testpi'
 FIRST_USER_NAME='pi'
