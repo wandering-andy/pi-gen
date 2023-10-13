@@ -98,7 +98,7 @@ run_stage(){
 		fi
 	fi
 	if [ ! -f SKIP ]; then
-		if [ "${CLEAN}" = "1" ] && [ "${USE_QCOW2}" = "0" ] ; then
+		if [ "${CLEAN}" = "1" ]; then
 			if [ -d "${ROOTFS_DIR}" ]; then
 				rm -rf "${ROOTFS_DIR}"
 			fi
