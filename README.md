@@ -109,11 +109,6 @@ The following environment variables are supported:
    information on this. Usually 0 is no compression but very fast, up to 9 with
    the best compression but very slow ).
 
-* `USE_QEMU` (Default: `"0"`)
-
-   Setting to '1' enables the QEMU mode - creating an image that can be mounted via QEMU for an emulated
-   environment. These images include "-qemu" in the image file name.
-
  * `LOCALE_DEFAULT` (Default: "en_US.UTF-8" )
 
    Default system locale.
@@ -290,13 +285,6 @@ After successful build, the build container is by default removed. This may be u
 ```bash
 PRESERVE_CONTAINER=1 ./build-docker.sh
 ```
-
-There is a possibility that even when running from a docker container, the
-installation of `qemu-user-static` will silently fail when building the image
-because `binfmt-support` _must be enabled on the underlying kernel_. An easy
-fix is to ensure `binfmt-support` is installed on the host machine before
-starting the `./build-docker.sh` script (or using your own docker build
-solution).
 
 ### Passing arguments to Docker
 
