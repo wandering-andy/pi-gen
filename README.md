@@ -102,14 +102,6 @@ The following environment variables are supported:
    * `gz` to deploy a gzipped image (`.img.gz`).
    * `xz` to deploy a xzipped image (`.img.xz`).
 
-
- * `DEPLOY_ZIP` (Deprecated)
-
-   This option has been deprecated in favor of `DEPLOY_COMPRESSION`.
-
-   If `DEPLOY_ZIP=0` is still present in your config file, the behavior is the
-   same as with `DEPLOY_COMPRESSION=none`.
-
  * `COMPRESSION_LEVEL` (Default: `6`)
 
    Compression level to be used when using `zip`, `gz` or `xz` for
