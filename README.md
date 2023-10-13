@@ -114,7 +114,7 @@ The following environment variables are supported:
    Setting to '1' enables the QEMU mode - creating an image that can be mounted via QEMU for an emulated
    environment. These images include "-qemu" in the image file name.
 
- * `LOCALE_DEFAULT` (Default: "en_GB.UTF-8" )
+ * `LOCALE_DEFAULT` (Default: "en_US.UTF-8" )
 
    Default system locale.
 
