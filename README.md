@@ -122,7 +122,7 @@ The following environment variables are supported:
 
    Setting the hostname to the specified value.
 
- * `KEYBOARD_KEYMAP` (Default: "gb" )
+ * `KEYBOARD_KEYMAP` (Default: "us" )
 
    Default keyboard keymap.
 
@@ -130,7 +130,7 @@ The following environment variables are supported:
    keyboard-configuration` and look at the
    `keyboard-configuration/xkb-keymap` value.
 
- * `KEYBOARD_LAYOUT` (Default: "English (UK)" )
+ * `KEYBOARD_LAYOUT` (Default: "English (US)" )
 
    Default keyboard layout.
 
@@ -138,7 +138,7 @@ The following environment variables are supported:
    keyboard-configuration` and look at the
    `keyboard-configuration/variant` value.
 
- * `TIMEZONE_DEFAULT` (Default: "Europe/London" )
+ * `TIMEZONE_DEFAULT` (Default: "American/Denver" )
 
    Default keyboard layout.
 
