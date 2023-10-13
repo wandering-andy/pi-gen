@@ -15,7 +15,7 @@ if \
 	DOCKER="sudo ${DOCKER}"
 fi
 if ! ${DOCKER} ps >/dev/null; then
-	echo "error connecting to docker:"
+	echo "Error connecting to docker:"
 	${DOCKER} ps
 	exit 1
 fi
