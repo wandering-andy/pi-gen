@@ -122,7 +122,7 @@ The following environment variables are supported:
 
    Setting the hostname to the specified value.
 
- * `KEYBOARD_KEYMAP` (Default: "gb" )
+ * `KEYBOARD_KEYMAP` (Default: "us" )
 
    Default keyboard keymap.
 
@@ -130,7 +130,7 @@ The following environment variables are supported:
    keyboard-configuration` and look at the
    `keyboard-configuration/xkb-keymap` value.
 
- * `KEYBOARD_LAYOUT` (Default: "English (UK)" )
+ * `KEYBOARD_LAYOUT` (Default: "English (US)" )
 
    Default keyboard layout.
 
@@ -138,7 +138,7 @@ The following environment variables are supported:
    keyboard-configuration` and look at the
    `keyboard-configuration/variant` value.
 
- * `TIMEZONE_DEFAULT` (Default: "Europe/London" )
+ * `TIMEZONE_DEFAULT` (Default: "American/Denver" )
 
    Default keyboard layout.
 
@@ -162,7 +162,7 @@ The following environment variables are supported:
    stays activated. `FIRST_USER_PASS` must be set for this to work. Please be aware of the implied
    security risk of defining a default username and password for your devices.
 
- * `WPA_COUNTRY` is a 2-letter ISO/IEC 3166 country Code, i.e. `GB`
+ * `WPA_COUNTRY` is a 2-letter ISO/IEC 3166 country Code, i.e. `US`
 
  * `ENABLE_SSH` (Default: `0`)
 
