@@ -158,11 +158,11 @@ The following environment variables are supported:
 
  * `DISABLE_FIRST_BOOT_USER_RENAME` (Default: `0`)
 
-   Disable the renaming of the first user during the first boot. This make it so `FIRST_USER_NAME`
-   stays activated. `FIRST_USER_PASS` must be set for this to work. Please be aware of the implied
-   security risk of defining a default username and password for your devices.
+   Disable the renaming of the first user during the first boot. This make it so `FIRST_USER_NAME` stays activated. `FIRST_USER_PASS` must be set for this to work. Please be aware of the implied security risk of defining a default username and password for your devices.
 
- * `WPA_COUNTRY` is a 2-letter ISO/IEC 3166 country Code, i.e. `GB`
+ * `WPA_COUNTRY` (Default: `US`)
+
+   Sets the default WLAN regulatory domain and unblocks WLAN interfaces. This should be a 2-letter ISO/IEC 3166 country Code, i.e. `US`.
 
  * `ENABLE_SSH` (Default: `0`)
 
