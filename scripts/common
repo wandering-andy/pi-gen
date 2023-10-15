@@ -6,6 +6,8 @@ export -f log
 bootstrap(){
 	local BOOTSTRAP_CMD=debootstrap
 	local BOOTSTRAP_ARGS=()
+	local BOOTSTRAP_CMD=debootstrap
+	local BOOTSTRAP_ARGS=()
 
 	export http_proxy=${APT_PROXY}
 

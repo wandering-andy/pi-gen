@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 IMG_FILE="${STAGE_WORK_DIR}/${IMG_FILENAME}${IMG_SUFFIX}.img"
+IMG_FILE="${STAGE_WORK_DIR}/${IMG_FILENAME}${IMG_SUFFIX}.img"
 
 unmount_image "${IMG_FILE}"
 
@@ -53,7 +54,13 @@ for FEATURE in 64bit; do
 if grep -q "$FEATURE" /etc/mke2fs.conf; then
 	ROOT_FEATURES="^$FEATURE,$ROOT_FEATURES"
 fi
+for FEATURE in 64bit; do
+if grep -q "$FEATURE" /etc/mke2fs.conf; then
+	ROOT_FEATURES="^$FEATURE,$ROOT_FEATURES"
+fi
 done
+mkdosfs -n bootfs -F 32 -s 4 -v "$BOOT_DEV" > /dev/null
+mkfs.ext4 -L rootfs -O "$ROOT_FEATURES" "$ROOT_DEV" > /dev/null
 mkdosfs -n bootfs -F 32 -s 4 -v "$BOOT_DEV" > /dev/null
 mkfs.ext4 -L rootfs -O "$ROOT_FEATURES" "$ROOT_DEV" > /dev/null
 

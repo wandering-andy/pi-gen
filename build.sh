@@ -145,6 +145,11 @@ if [ -f config ]; then
 	source config
 fi
 
+if [ -f wifi-config ]; then
+	# shellcheck disable=SC1091
+	source wifi-config
+fi
+
 while getopts "c:" flag
 do
 	case "$flag" in
@@ -172,7 +177,7 @@ export IMG_FILENAME="${IMG_FILENAME:-"${IMG_DATE}-${IMG_NAME}"}"
 export ARCHIVE_FILENAME="${ARCHIVE_FILENAME:-"image_${IMG_DATE}-${IMG_NAME}"}"
 
 export SCRIPT_DIR="${BASE_DIR}/scripts"
-export WORK_DIR="${WORK_DIR:-"${BASE_DIR}/work/${IMG_NAME}"}"
+export WORK_DIR=${WORK_DIR:-"${BASE_DIR}/work/${IMG_DATE}-${IMG_NAME}"}
 export DEPLOY_DIR=${DEPLOY_DIR:-"${BASE_DIR}/deploy"}
 
 export DEPLOY_COMPRESSION=${DEPLOY_COMPRESSION:-zip}
@@ -185,6 +190,8 @@ export FIRST_USER_NAME=${FIRST_USER_NAME:-pi}
 export FIRST_USER_PASS
 export DISABLE_FIRST_BOOT_USER_RENAME=${DISABLE_FIRST_BOOT_USER_RENAME:-0}
 export RELEASE=${RELEASE:-bookworm} # Don't forget to update stage0/prerun.sh
+export WPA_ESSID
+export WPA_PASSWORD
 export WPA_COUNTRY
 export ENABLE_SSH="${ENABLE_SSH:-0}"
 export PUBKEY_ONLY_SSH="${PUBKEY_ONLY_SSH:-0}"
