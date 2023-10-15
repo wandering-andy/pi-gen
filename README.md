@@ -13,9 +13,7 @@ to use the Docker build described below.
 To install the required dependencies for `pi-gen` you should run:
 
 ```bash
-apt-get install coreutils quilt parted qemu-user-static debootstrap zerofree zip \
-dosfstools libarchive-tools libcap2-bin grep rsync xz-utils file git curl bc \
-qemu-utils kpartx gpg pigz
+sudo apt install --no-install-recommends -y coreutils quilt parted qemu-user-static debootstrap zerofree zip dosfstools libarchive-tools libcap2-bin grep rsync xz-utils file git curl bc gpg pigz
 ```
 
 The file `depends` contains a list of tools needed.  The format of this
@@ -54,29 +52,6 @@ The following environment variables are supported:
    `IMG_NAME=Raspbian` is logical for an unmodified RPi-Distro/pi-gen build,
    but you should use something else for a customized version.  Export files
    in stages may add suffixes to `IMG_NAME`.
-
-* `USE_QCOW2` **EXPERIMENTAL** (Default: `0` )
-
-    Instead of using traditional way of building the rootfs of every stage in
-    single subdirectories and copying over the previous one to the next one,
-    qcow2 based virtual disks with backing images are used in every stage.
-    This speeds up the build process and reduces overall space consumption
-    significantly.
-
-    <u>Additional optional parameters regarding qcow2 build:</u>
-
-    * `BASE_QCOW2_SIZE` (Default: 12G)
-
-        Size of the virtual qcow2 disk.
-        Note: it will not actually use that much of space at once but defines the
-        maximum size of the virtual disk. If you change the build process by adding
-        a lot of bigger packages or additional build stages, it can be necessary to
-        increase the value because the virtual disk can run out of space like a normal
-        hard drive would.
-
-    **CAUTION:**  Although the qcow2 build mechanism will run fine inside Docker, it can happen
-    that the network block device is not disconnected correctly after the Docker process has
-    ended abnormally. In that case see [Disconnect an image if something went wrong](#Disconnect-an-image-if-something-went-wrong)
 
 * `RELEASE` (Default: bullseye)
 
@@ -117,7 +92,7 @@ The following environment variables are supported:
 
  * `DEPLOY_DIR`  (Default: `"$BASE_DIR/deploy"`)
 
-   Output directory for target system images and NOOBS bundles.
+   Output directory for target system images.
 
  * `DEPLOY_COMPRESSION` (Default: `zip`)
 
@@ -127,14 +102,6 @@ The following environment variables are supported:
    * `gz` to deploy a gzipped image (`.img.gz`).
    * `xz` to deploy a xzipped image (`.img.xz`).
 
-
- * `DEPLOY_ZIP` (Deprecated)
-
-   This option has been deprecated in favor of `DEPLOY_COMPRESSION`.
-
-   If `DEPLOY_ZIP=0` is still present in your config file, the behavior is the
-   same as with `DEPLOY_COMPRESSION=none`.
-
  * `COMPRESSION_LEVEL` (Default: `6`)
 
    Compression level to be used when using `zip`, `gz` or `xz` for
@@ -142,12 +109,12 @@ The following environment variables are supported:
    information on this. Usually 0 is no compression but very fast, up to 9 with
    the best compression but very slow ).
 
- * `USE_QEMU` (Default: `"0"`)
+* `USE_QEMU` (Default: `"0"`)
 
    Setting to '1' enables the QEMU mode - creating an image that can be mounted via QEMU for an emulated
    environment. These images include "-qemu" in the image file name.
 
- * `LOCALE_DEFAULT` (Default: "en_GB.UTF-8" )
+ * `LOCALE_DEFAULT` (Default: "en_US.UTF-8" )
 
    Default system locale.
 
@@ -155,7 +122,7 @@ The following environment variables are supported:
 
    Setting the hostname to the specified value.
 
- * `KEYBOARD_KEYMAP` (Default: "gb" )
+ * `KEYBOARD_KEYMAP` (Default: "us" )
 
    Default keyboard keymap.
 
@@ -163,7 +130,7 @@ The following environment variables are supported:
    keyboard-configuration` and look at the
    `keyboard-configuration/xkb-keymap` value.
 
- * `KEYBOARD_LAYOUT` (Default: "English (UK)" )
+ * `KEYBOARD_LAYOUT` (Default: "English (US)" )
 
    Default keyboard layout.
 
@@ -171,7 +138,7 @@ The following environment variables are supported:
    keyboard-configuration` and look at the
    `keyboard-configuration/variant` value.
 
- * `TIMEZONE_DEFAULT` (Default: "Europe/London" )
+ * `TIMEZONE_DEFAULT` (Default: "American/Denver" )
 
    Default keyboard layout.
 
@@ -195,9 +162,9 @@ The following environment variables are supported:
    stays activated. `FIRST_USER_PASS` must be set for this to work. Please be aware of the implied
    security risk of defining a default username and password for your devices.
 
- * `WPA_COUNTRY` (Default: unset)
+ * `WPA_COUNTRY` (Default: `US`)
 
-   Sets the default WLAN regulatory domain and unblocks WLAN interfaces. This should be a 2-letter ISO/IEC 3166 country Code, i.e. `GB`
+   Sets the default WLAN regulatory domain and unblocks WLAN interfaces. This should be a 2-letter ISO/IEC 3166 country Code, i.e. `US`
 
  * `ENABLE_SSH` (Default: `0`)
 
@@ -277,7 +244,7 @@ The following process is followed to build images:
        be interrupted with a bash session, allowing an opportunity to create/revise
        the patches.
 
-  * If the stage directory contains files called "EXPORT_NOOBS" or "EXPORT_IMAGE" then
+  * If the stage directory contains a file called "EXPORT_IMAGE" then
     add this stage to a list of images to generate
 
   * Generate the images for any stages that have specified them
@@ -423,71 +390,6 @@ follows:
  * Rebuild just the last stage using ```sudo CLEAN=1 ./build.sh```
  * Once you're happy with the image you can remove the SKIP_IMAGES files and
    export your image to test
-
-# Regarding Qcow2 image building
-
-### Get infos about the image in use
-
-If you issue the two commands shown in the example below in a second command shell while a build
-is running you can find out, which network block device is currently being used and which qcow2 image
-is bound to it.
-
-Example:
-
-```bash
-root@build-machine:~/$ lsblk | grep nbd
-nbd1      43:32   0    10G  0 disk
-├─nbd1p1  43:33   0    10G  0 part
-└─nbd1p1 253:0    0    10G  0 part
-
-root@build-machine:~/$ ps xa | grep qemu-nbd
- 2392 pts/6    S+     0:00 grep --color=auto qemu-nbd
-31294 ?        Ssl    0:12 qemu-nbd --discard=unmap -c /dev/nbd1 image-stage4.qcow2
-```
-
-Here you can see, that the qcow2 image `image-stage4.qcow2` is currently connected to `/dev/nbd1` with
-the associated partition map `/dev/mapper/nbd1p1`. Don't worry that `lsblk` shows two entries. It is totally fine, because the device map is accessible via `/dev/mapper/nbd1p1` and also via `/dev/dm-0`. This is all part of the device mapper functionality of the kernel. See `dmsetup` for further information.
-
-### Mount a qcow2 image
-
-If you want to examine the content of a a single stage, you can simply mount the qcow2 image found in the `WORK_DIR` directory with the tool `./imagetool.sh`.
-
-See `./imagetool.sh -h` for further details on how to use it.
-
-### Disconnect an image if something went wrong
-
-It can happen, that your build stops in case of an error. Normally `./build.sh` should handle image disconnection appropriately, but in rare cases, especially during a Docker build, this may not work as expected. If that happens, starting a new build will fail and you may have to disconnect the image and/or device yourself.
-
-A typical message indicating that there are some orphaned device mapper entries is this:
-
-```
-Failed to set NBD socket
-Disconnect client, due to: Unexpected end-of-file before all bytes were read
-```
-
-If that happens go through the following steps:
-
-1. First, check if the image is somehow mounted to a directory entry and umount it as you would any other block device, like i.e. a hard disk or USB stick.
-
-2. Second, to disconnect an image from `qemu-nbd`, the QEMU Disk Network Block Device Server, issue the following command (be sure to change the device name to the one actually used):
-
-   ```bash
-   sudo qemu-nbd -d /dev/nbd1
-   ```
-
-   Note: if you use Docker build, normally no active `qemu-nbd` process exists anymore as it will be terminated when the Docker container stops.
-
-3. To disconnect a device partition map from the network block device, execute:
-
-   ```bash
-   sudo kpartx -d /dev/nbd1
-   or
-   sudo ./imagetool.sh --cleanup
-   ```
-
-   Note: The `imagetool.sh` command will cleanup any /dev/nbdX that is not connected to a running `qemu-nbd` daemon. Be careful if you use network block devices for other tasks utilizing NBDs on your build machine as well.
-
-Now you should be able to start a new build without running into troubles again. Most of the time, especially when using Docker build, you will only need no. 3 to get everything up and running again.
 
 # Troubleshooting
 

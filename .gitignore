@@ -1,6 +1,6 @@
 deploy/*
 work/*
-config
+wifi-config
 postrun.sh
 SKIP
 SKIP_IMAGES
