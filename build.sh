@@ -171,9 +171,10 @@ if [ -z "${IMG_NAME}" ]; then
 	exit 1
 fi
 
+
 export USE_QEMU="${USE_QEMU:-0}"
 export IMG_DATE="${IMG_DATE:-"$(date +%Y-%m-%d)"}"
-export IMG_FILENAME="${IMG_FILENAME:-"${IMG_DATE}-${IMG_NAME}"}"
+export IMG_FILENAME="${IMG_FILENAME:-"${IMG_DATE}-${IMG_NAME}_v${IMG_VER}"}"
 export ARCHIVE_FILENAME="${ARCHIVE_FILENAME:-"image_${IMG_DATE}-${IMG_NAME}"}"
 
 export SCRIPT_DIR="${BASE_DIR}/scripts"
