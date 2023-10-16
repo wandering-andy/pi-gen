@@ -192,6 +192,7 @@ term() {
 
 trap term EXIT INT TERM
 
+export IMG_ARCH=${IMG_ARCH:aarch64}
 export PI_GEN=${PI_GEN:-pi-gen}
 export PI_GEN_REPO=${PI_GEN_REPO:-https://github.com/RPi-Distro/pi-gen}
 

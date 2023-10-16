@@ -12,10 +12,20 @@ else
 	rm -f "${ROOTFS_DIR}/etc/apt/apt.conf.d/51cache"
 fi
 
+# If IMG_ARCH=aarch64 then...
 cat files/raspberrypi.gpg.key | gpg --dearmor > "${STAGE_WORK_DIR}/raspberrypi-archive-stable.gpg"
 install -m 644 "${STAGE_WORK_DIR}/raspberrypi-archive-stable.gpg" "${ROOTFS_DIR}/etc/apt/trusted.gpg.d/"
 on_chroot << EOF
 dpkg --add-architecture arm64
+apt-get update
+apt-get dist-upgrade -y
+EOF
+
+# Elif IMG_ARCH=x86_64 then...
+cat files/raspberrypi.gpg.key | gpg --dearmor > "${STAGE_WORK_DIR}/raspberrypi-archive-stable.gpg"
+install -m 644 "${STAGE_WORK_DIR}/raspberrypi-archive-stable.gpg" "${ROOTFS_DIR}/etc/apt/trusted.gpg.d/"
+on_chroot << EOF
+dpkg --add-architecture armhf
 apt-get update
 apt-get dist-upgrade -y
 EOF
