@@ -1,0 +1,264 @@
+diff --git a/README.md b/README.md
+index ea276ab..cbe0a27 100644
+--- a/README.md
++++ b/README.md
+@@ -531,7 +531,7 @@ To resolve this, ensure that the following files are available (install them if
+ 
+ ```
+ /lib/modules/$(uname -r)/kernel/fs/binfmt_misc.ko
+-/usr/bin/qemu-arm-static
++/usr/bin/qemu-aarch64-static
+ ```
+ 
+ You may also need to load the module by hand - run `modprobe binfmt_misc`.
+diff --git a/build-docker.sh b/build-docker.sh
+index 3445a40..8d71b0f 100755
+--- a/build-docker.sh
++++ b/build-docker.sh
+@@ -82,16 +82,7 @@ fi
+ # Modify original build-options to allow config file to be mounted in the docker container
+ BUILD_OPTS="$(echo "${BUILD_OPTS:-}" | sed -E 's@\-c\s?([^ ]+)@-c /config@')"
+ 
+-# Check the arch of the machine we're running on. If it's 64-bit, use a 32-bit base image instead
+-case "$(uname -m)" in
+-  x86_64|aarch64)
+-    BASE_IMAGE=i386/debian:bullseye
+-    ;;
+-  *)
+-    BASE_IMAGE=debian:bullseye
+-    ;;
+-esac
+-${DOCKER} build --build-arg BASE_IMAGE=${BASE_IMAGE} -t pi-gen "${DIR}"
++${DOCKER} build --build-arg BASE_IMAGE=debian:bullseye -t pi-gen "${DIR}"
+ 
+ if [ "${CONTAINER_EXISTS}" != "" ]; then
+   DOCKER_CMDLINE_NAME="${CONTAINER_NAME}_cont"
+@@ -114,10 +105,10 @@ case $(uname -m) in
+     ;;
+ esac
+ 
+-# Check if qemu-arm-static and /proc/sys/fs/binfmt_misc are present
++# Check if qemu-aarch64-static and /proc/sys/fs/binfmt_misc are present
+ if [[ "${binfmt_misc_required}" == "1" ]]; then
+-  if ! qemu_arm=$(which qemu-arm-static) ; then
+-    echo "qemu-arm-static not found (please install qemu-user-static)"
++  if ! qemu_arm=$(which qemu-aarch64-static) ; then
++    echo "qemu-aarch64-static not found (please install qemu-user-static)"
+     exit 1
+   fi
+   if [ ! -f /proc/sys/fs/binfmt_misc/register ]; then
+@@ -128,13 +119,13 @@ if [[ "${binfmt_misc_required}" == "1" ]]; then
+     fi
+     echo "binfmt_misc mounted"
+   fi
+-  if ! grep -q "^interpreter ${qemu_arm}" /proc/sys/fs/binfmt_misc/qemu-arm* ; then
+-    # Register qemu-arm for binfmt_misc
+-    reg="echo ':qemu-arm-rpi:M::"\
+-"\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:"\
++  if ! grep -q "^interpreter ${qemu_arm}" /proc/sys/fs/binfmt_misc/qemu-aarch64* ; then
++    # Register qemu-aarch64 for binfmt_misc
++    reg="echo ':qemu-aarch64-rpi:M::"\
++"\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7\x00:"\
+ "\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:"\
+ "${qemu_arm}:F' > /proc/sys/fs/binfmt_misc/register"
+-    echo "Registering qemu-arm for binfmt_misc..."
++    echo "Registering qemu-aarch64 for binfmt_misc..."
+     sudo bash -c "${reg}" 2>/dev/null || true
+   fi
+ fi
+diff --git a/export-noobs/00-release/files/os.json b/export-noobs/00-release/files/os.json
+index 6cc0e36..0c174d1 100644
+--- a/export-noobs/00-release/files/os.json
++++ b/export-noobs/00-release/files/os.json
+@@ -1,18 +1,15 @@
+ {
+     "description": "NOOBS_DESCRIPTION",
+-    "feature_level": 35120124,
+     "kernel": "KERNEL",
+     "name": "NOOBS_NAME",
+     "password": "raspberry",
+     "release_date": "UNRELEASED",
+-    "supported_hex_revisions": "2,3,4,5,6,7,8,9,d,e,f,10,11,12,14,19,1040,1041,0092,0093,2082",
+     "supported_models": [
+-        "Pi Model",
+-        "Pi 2",
+-        "Pi Zero",
++        "Pi Zero 2",
+         "Pi 3",
++        "Pi 4",
+         "Pi Compute Module 3",
+-        "Pi 4"
++        "Pi Compute Module 4"
+     ],
+     "url": "http://www.raspbian.org/",
+     "username": "pi",
+diff --git a/scripts/common b/scripts/common
+index c94b0f0..8c54c45 100644
+--- a/scripts/common
++++ b/scripts/common
+@@ -9,15 +9,16 @@ bootstrap(){
+ 
+ 	export http_proxy=${APT_PROXY}
+ 
+-	BOOTSTRAP_ARGS+=(--arch armhf)
++	BOOTSTRAP_ARGS+=(--arch arm64)
++	BOOTSTRAP_ARGS+=(--include gnupg)
+ 	BOOTSTRAP_ARGS+=(--components "main,contrib,non-free")
+-	BOOTSTRAP_ARGS+=(--keyring "${STAGE_DIR}/files/raspberrypi.gpg")
++	#BOOTSTRAP_ARGS+=(--keyring "${STAGE_DIR}/files/raspberrypi.gpg")
+ 	BOOTSTRAP_ARGS+=(--exclude=info)
+ 	BOOTSTRAP_ARGS+=(--include=ca-certificates)
+ 	BOOTSTRAP_ARGS+=("$@")
+ 	printf -v BOOTSTRAP_STR '%q ' "${BOOTSTRAP_ARGS[@]}"
+ 
+-	setarch linux32 capsh $CAPSH_ARG -- -c "'${BOOTSTRAP_CMD}' $BOOTSTRAP_STR" || true
++	capsh $CAPSH_ARG -- -c "'${BOOTSTRAP_CMD}' $BOOTSTRAP_STR" || true
+ 
+ 	if [ -d "$2/debootstrap" ] && ! rmdir "$2/debootstrap"; then
+ 		cp "$2/debootstrap/debootstrap.log" "${STAGE_WORK_DIR}"
+@@ -94,7 +95,7 @@ on_chroot() {
+ 		mount -t tmpfs  tmpfs "${ROOTFS_DIR}/tmp"
+ 	fi
+ 
+-	setarch linux32 capsh $CAPSH_ARG "--chroot=${ROOTFS_DIR}/" -- -e "$@"
++	capsh $CAPSH_ARG "--chroot=${ROOTFS_DIR}/" -- -e "$@"
+ }
+ export -f on_chroot
+ 
+diff --git a/stage0/00-configure-apt/00-run.sh b/stage0/00-configure-apt/00-run.sh
+index fa4f59f..c962c35 100755
+--- a/stage0/00-configure-apt/00-run.sh
++++ b/stage0/00-configure-apt/00-run.sh
+@@ -15,7 +15,7 @@ fi
+ cat files/raspberrypi.gpg.key | gpg --dearmor > "${STAGE_WORK_DIR}/raspberrypi-archive-stable.gpg"
+ install -m 644 "${STAGE_WORK_DIR}/raspberrypi-archive-stable.gpg" "${ROOTFS_DIR}/etc/apt/trusted.gpg.d/"
+ on_chroot << EOF
+-dpkg --add-architecture arm64
++dpkg --add-architecture armhf
+ apt-get update
+ apt-get dist-upgrade -y
+ EOF
+diff --git a/stage0/00-configure-apt/files/sources.list b/stage0/00-configure-apt/files/sources.list
+index 3ef0699..13697ce 100644
+--- a/stage0/00-configure-apt/files/sources.list
++++ b/stage0/00-configure-apt/files/sources.list
+@@ -1,3 +1,7 @@
+-deb [ arch=armhf ] http://raspbian.raspberrypi.com/raspbian/ RELEASE main contrib non-free rpi
+-# Uncomment line below then 'apt-get update' to enable 'apt-get source'
+-#deb-src http://raspbian.raspberrypi.com/raspbian/ RELEASE main contrib non-free rpi
++deb http://deb.debian.org/debian RELEASE main contrib non-free non-free-firmware
++deb http://deb.debian.org/debian-security/ RELEASE-security main contrib non-free non-free-firmware
++deb http://deb.debian.org/debian RELEASE-updates main contrib non-free non-free-firmware
++# Uncomment deb-src lines below then 'apt-get update' to enable 'apt-get source'
++#deb-src http://deb.debian.org/debian RELEASE main contrib non-free non-free-firmware
++#deb-src http://deb.debian.org/debian-security/ RELEASE-security main contrib non-free non-free-firmware
++#deb-src http://deb.debian.org/debian RELEASE-updates main contrib non-free non-free-firmware
+diff --git a/stage0/02-firmware/01-packages b/stage0/02-firmware/01-packages
+index 38f2f52..a1c3135 100644
+--- a/stage0/02-firmware/01-packages
++++ b/stage0/02-firmware/01-packages
+@@ -1,9 +1,6 @@
+ initramfs-tools
+ raspi-firmware
+-linux-image-rpi-v6
+-linux-image-rpi-v7
+-linux-image-rpi-v7l
+ linux-image-rpi-v8
+-linux-headers-rpi-v6
+-linux-headers-rpi-v7
+-linux-headers-rpi-v7l
++linux-image-rpi-2712
++linux-headers-rpi-v8
++linux-headers-rpi-2712
+diff --git a/stage0/prerun.sh b/stage0/prerun.sh
+index 0252071..da6f50a 100755
+--- a/stage0/prerun.sh
++++ b/stage0/prerun.sh
+@@ -6,5 +6,5 @@ if [ "$RELEASE" != "bookworm" ]; then
+ fi
+ 
+ if [ ! -d "${ROOTFS_DIR}" ] || [ "${USE_QCOW2}" = "1" ]; then
+-	bootstrap ${RELEASE} "${ROOTFS_DIR}" http://raspbian.raspberrypi.com/raspbian/
++	bootstrap ${RELEASE} "${ROOTFS_DIR}" http://deb.debian.org/debian/
+ fi
+diff --git a/stage1/00-boot-files/files/config.txt b/stage1/00-boot-files/files/config.txt
+index 621637a..a1fdaeb 100644
+--- a/stage1/00-boot-files/files/config.txt
++++ b/stage1/00-boot-files/files/config.txt
+@@ -30,6 +30,9 @@ max_framebuffers=2
+ # Use the kernel's default instead.
+ disable_fw_kms_setup=1
+ 
++# Run in 64-bit mode
++arm_64bit=1
++
+ # Disable compensation for displays with overscan
+ disable_overscan=1
+ 
+diff --git a/stage2/00-copies-and-fills/01-packages b/stage2/00-copies-and-fills/01-packages
+deleted file mode 100644
+index 283c290..0000000
+--- a/stage2/00-copies-and-fills/01-packages
++++ /dev/null
+@@ -1 +0,0 @@
+-raspi-copies-and-fills
+diff --git a/stage2/00-copies-and-fills/02-run.sh b/stage2/00-copies-and-fills/02-run.sh
+deleted file mode 100755
+index 366ac24..0000000
+--- a/stage2/00-copies-and-fills/02-run.sh
++++ /dev/null
+@@ -1,6 +0,0 @@
+-#!/bin/bash -e
+-
+-if [ -f "${ROOTFS_DIR}/etc/ld.so.preload" ]; then
+-   mv "${ROOTFS_DIR}/etc/ld.so.preload" "${ROOTFS_DIR}/etc/ld.so.preload.disabled"
+-fi
+-
+diff --git a/stage2/02-net-tweaks/01-run.sh b/stage2/02-net-tweaks/01-run.sh
+index d49bdeb..4aa8148 100755
+--- a/stage2/02-net-tweaks/01-run.sh
++++ b/stage2/02-net-tweaks/01-run.sh
+@@ -14,7 +14,9 @@ mkdir -p "${ROOTFS_DIR}/var/lib/systemd/rfkill/"
+ if [ -n "$WPA_COUNTRY" ]; then
+     echo 0 > "${ROOTFS_DIR}/var/lib/systemd/rfkill/platform-3f300000.mmcnr:wlan"
+     echo 0 > "${ROOTFS_DIR}/var/lib/systemd/rfkill/platform-fe300000.mmcnr:wlan"
++    echo 0 > "${ROOTFS_DIR}/var/lib/systemd/rfkill/platform-1001100000.mmc:wlan"
+ else
+     echo 1 > "${ROOTFS_DIR}/var/lib/systemd/rfkill/platform-3f300000.mmcnr:wlan"
+     echo 1 > "${ROOTFS_DIR}/var/lib/systemd/rfkill/platform-fe300000.mmcnr:wlan"
++    echo 1 > "${ROOTFS_DIR}/var/lib/systemd/rfkill/platform-1001100000.mmc:wlan"
+ fi
+diff --git a/stage3/00-install-packages/00-packages b/stage3/00-install-packages/00-packages
+index cc18081..79d2c6a 100644
+--- a/stage3/00-install-packages/00-packages
++++ b/stage3/00-install-packages/00-packages
+@@ -1,4 +1,4 @@
+-gstreamer1.0-x gstreamer1.0-omx gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-alsa gstreamer1.0-libav
++gstreamer1.0-x gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-alsa gstreamer1.0-libav
+ evince gtk2-engines alsa-utils
+ desktop-base
+ git
+diff --git a/stage3/00-install-packages/00-packages-nr b/stage3/00-install-packages/00-packages-nr
+index 66f3004..227c861 100644
+--- a/stage3/00-install-packages/00-packages-nr
++++ b/stage3/00-install-packages/00-packages-nr
+@@ -1,4 +1,4 @@
+-xserver-xorg-video-fbdev xserver-xorg xinit xserver-xorg-video-fbturbo
++xserver-xorg xinit
+ mousepad
+ eom
+ lxde lxtask menu-xdg
+diff --git a/stage3/00-install-packages/01-run.sh b/stage3/00-install-packages/01-run.sh
+index 0e8248d..f4c6727 100755
+--- a/stage3/00-install-packages/01-run.sh
++++ b/stage3/00-install-packages/01-run.sh
+@@ -1,9 +1,5 @@
+ #!/bin/bash -e
+ 
+ on_chroot << EOF
+-update-alternatives --install /usr/bin/x-www-browser \
+-  x-www-browser /usr/bin/chromium-browser 86
+-update-alternatives --install /usr/bin/gnome-www-browser \
+-  gnome-www-browser /usr/bin/chromium-browser 86
+   apt-mark auto python3-pyqt5 python3-opengl
+ EOF
