@@ -54,20 +54,14 @@ for FEATURE in 64bit; do
 if grep -q "$FEATURE" /etc/mke2fs.conf; then
 	ROOT_FEATURES="^$FEATURE,$ROOT_FEATURES"
 fi
-for FEATURE in 64bit; do
-if grep -q "$FEATURE" /etc/mke2fs.conf; then
-	ROOT_FEATURES="^$FEATURE,$ROOT_FEATURES"
-fi
+
 done
 mkdosfs -n bootfs -F 32 -s 4 -v "$BOOT_DEV" > /dev/null
 mkfs.ext4 -L rootfs -O "$ROOT_FEATURES" "$ROOT_DEV" > /dev/null
-mkdosfs -n bootfs -F 32 -s 4 -v "$BOOT_DEV" > /dev/null
-mkfs.ext4 -L rootfs -O "$ROOT_FEATURES" "$ROOT_DEV" > /dev/null
 
-	mount -v "$ROOT_DEV" "${ROOTFS_DIR}" -t ext4
-	mkdir -p "${ROOTFS_DIR}/boot/firmware"
-	mount -v "$BOOT_DEV" "${ROOTFS_DIR}/boot/firmware" -t vfat
+mount -v "$ROOT_DEV" "${ROOTFS_DIR}" -t ext4
+mkdir -p "${ROOTFS_DIR}/boot/firmware"
+mount -v "$BOOT_DEV" "${ROOTFS_DIR}/boot/firmware" -t vfat
 
-	rsync -aHAXx --exclude /var/cache/apt/archives --exclude /boot/firmware "${EXPORT_ROOTFS_DIR}/" "${ROOTFS_DIR}/"
-	rsync -rtx "${EXPORT_ROOTFS_DIR}/boot/firmware/" "${ROOTFS_DIR}/boot/firmware/"
-fi
+rsync -aHAXx --exclude /var/cache/apt/archives --exclude /boot/firmware "${EXPORT_ROOTFS_DIR}/" "${ROOTFS_DIR}/"
+rsync -rtx "${EXPORT_ROOTFS_DIR}/boot/firmware/" "${ROOTFS_DIR}/boot/firmware/"
