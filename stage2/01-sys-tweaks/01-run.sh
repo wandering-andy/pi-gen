@@ -48,14 +48,15 @@ systemctl enable resize2fs_once
 EOF
 fi
 
-on_chroot <<EOF
-for GRP in input spi i2c gpio; do
-	groupadd -f -r "\$GRP"
-done
-for GRP in adm dialout cdrom audio users sudo video games plugdev input gpio spi i2c netdev render; do
-  adduser $FIRST_USER_NAME \$GRP
-done
-EOF
+# Not necessary?
+#on_chroot <<EOF
+#for GRP in input spi i2c gpio; do
+#	groupadd -f -r "\$GRP"
+#done
+#for GRP in adm dialout cdrom audio users sudo video games plugdev input gpio spi i2c netdev render; do
+#  adduser $FIRST_USER_NAME \$GRP
+#done
+#EOF
 
 if [ -f "${ROOTFS_DIR}/etc/sudoers.d/010_pi-nopasswd" ]; then
   sed -i "s/^pi /$FIRST_USER_NAME /" "${ROOTFS_DIR}/etc/sudoers.d/010_pi-nopasswd"
@@ -70,3 +71,10 @@ usermod --pass='*' root
 EOF
 
 rm -f "${ROOTFS_DIR}/etc/ssh/"ssh_host_*_key*
+
+# Add FIRST_USER_NAME to sudo group and allow sudo without a password
+on_chroot << EOF
+usermod -aG sudo "${FIRST_USER_NAME}"
+echo "${FIRST_USER_NAME} ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/90-"${FIRST_USER_NAME}"-privileges >/dev/null
+chmod 0440 /etc/sudoers.d/90-"${FIRST_USER_NAME}"-privileges
+EOF

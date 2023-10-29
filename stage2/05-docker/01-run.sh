@@ -7,52 +7,13 @@
 # of the MIT license. The terms and conditions of this license are included with the Github
 # distribution of this package.
 
-clear
-echo
-echo "Welcome to the Docker Infrastructure installation script"
-echo "We will help you install Docker and Docker-compose."
-echo "and then help you with your configuration."
-echo
-echo 'Note - this scripts makes use of "sudo" to install Docker.'
-echo "If you haven't added your current login to the \"sudoer\" list,"
-echo "you may be asked for your password at various times during the installation."
-echo
-echo 'This script strongly prefers a "standard" OS setup of Debian Buster or later, including variations like'
-echo "Raspberry Pi OS or Ubuntu. It uses \'apt-get\' and \'wget\' to get started, and assumes access to"
-echo "the standard package repositories".
-echo
-echo "If you have an old device usign Debian Stretch, we will try to install the software, but be WARNED that"
-echo "Docker for Stretch is deprecated and is no longer actively supported by the Docker community."
-echo
-
+on_chroot << EOF
 if [[ $EUID == 0 ]]; then
 	echo 'STOP -- you are running this as an account with superuser privileges (ie: root), but should not be. It is best practice to NOT install Docker services as "root".'
 	echo "Instead please log out from this account, log in as a different non-superuser account, and rerun this script."
 	echo "If you are unsure of how to create a new user, you can learn how here: https://linuxize.com/post/how-to-create-a-sudo-user-on-debian/"
 	echo ""
 	exit 1
-fi
-
-echo "We'll start by adding your login name, \"${USER}\", to \"sudoers\". This will enable you to use \"sudo\" without having to type your password every time."
-echo "You may be asked to enter your password a few times below. We promise, this is the last time."
-echo
-read -p 'Should we do this now? If you choose "no", you can always to it later by yourself [Y/n] > ' -n 1 text
-if [[ ${text,,} != "n" ]]; then
-	echo
-	echo -n "Adding user \"${USER}\" to the \'sudo\' group... "
-	sudo usermod -aG sudo "${USER}"
-	echo "done!"
-	echo -n "Ensuring that user \"${USER}\" can run \'sudo\' without entering a password... "
-	echo "${USER} ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/90-"${USER}"-privileges >/dev/null
-	sudo chmod 0440 /etc/sudoers.d/90-"${USER}"-privileges
-	echo "done!"
-	echo
-	echo "You should be ready to go now. If it continues to ask for a password below, do the following:"
-	echo "- press CTRL-c to stop the execution of this install script"
-	echo '- type "exit" to log out from your machine'
-	echo "- log in again"
-	echo "- re-run this script using the same command as you did before"
-	echo
 fi
 
 echo -n "Updating repositories... "
@@ -64,7 +25,7 @@ curl -fsSL https://get.docker.com -o get-docker.sh
 echo "Installing Docker... "
 sudo sh get-docker.sh
 echo "Docker installed -- configuring docker..."
-sudo usermod -aG docker "${USER}"
+sudo usermod -aG docker "${FIST_USER_NAME}"
 sudo mkdir -p /etc/docker
 sudo chmod a+rwx /etc/docker
 cat >/etc/docker/daemon.json <<EOF
@@ -75,7 +36,7 @@ cat >/etc/docker/daemon.json <<EOF
     "max-file": "3"
   }
 }
-EOF
+EOL
 sudo chmod u=rw,go=r /etc/docker/daemon.json
 echo "export PATH=/usr/bin:$PATH" >>~/.bashrc
 export PATH=/usr/bin:$PATH
@@ -131,3 +92,4 @@ if ! grep localunixsocket /etc/hosts >/dev/null 2>&1; then
 	echo "Speeding up the recreation of containers when using docker-compose..."
 	sudo sed -i 's/^\(127.0.0.1\s*localhost\)\(.*\)/\1\2 localunixsocket localunixsocket.local localunixsocket.home/g' /etc/hosts
 fi
+EOF
