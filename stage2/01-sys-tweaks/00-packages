@@ -8,8 +8,7 @@ gdb git
 htop
 keyboard-configuration kms++-utils
 less libfreetype6-dev libmtp-runtime libpam-chksshpwd libraspberrypi-dev libraspberrypi-doc
-man-db
-manpages-dev
+man-db manpages-dev
 ncdu nfs-common ntfs-3g
 p7zip-full parted pciutils pi-bluetooth pkg-config policykit-1 psmisc
 raspberrypi-sys-mods raspi-utils raspinfo rpi-eeprom rpi-update rsync
