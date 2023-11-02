@@ -7,7 +7,7 @@
 # of the MIT license. The terms and conditions of this license are included with the Github
 # distribution of this package.
 
-on_chroot << EOF
+#on_chroot << EOF
 if [[ $EUID == 0 ]]; then
 	echo 'STOP -- you are running this as an account with superuser privileges (ie: root), but should not be. It is best practice to NOT install Docker services as "root".'
 	echo "Instead please log out from this account, log in as a different non-superuser account, and rerun this script."
@@ -25,7 +25,7 @@ curl -fsSL https://get.docker.com -o get-docker.sh
 echo "Installing Docker... "
 sudo sh get-docker.sh
 echo "Docker installed -- configuring docker..."
-sudo usermod -aG docker "${FIST_USER_NAME}"
+sudo usermod -aG docker "${FIRST_USER_NAME}"
 sudo mkdir -p /etc/docker
 sudo chmod a+rwx /etc/docker
 cat >/etc/docker/daemon.json <<EOF
@@ -36,7 +36,7 @@ cat >/etc/docker/daemon.json <<EOF
     "max-file": "3"
   }
 }
-EOL
+EOF
 sudo chmod u=rw,go=r /etc/docker/daemon.json
 echo "export PATH=/usr/bin:$PATH" >>~/.bashrc
 export PATH=/usr/bin:$PATH
