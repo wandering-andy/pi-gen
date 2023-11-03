@@ -239,7 +239,7 @@ fi
 
 dependencies_check "${BASE_DIR}/depends"
 
-#check username is valid
+# Check that username is valid
 if [[ ! "$FIRST_USER_NAME" =~ ^[a-z][-a-z0-9_]*$ ]]; then
 	echo "Invalid FIRST_USER_NAME: $FIRST_USER_NAME"
 	exit 1

@@ -82,6 +82,7 @@ fi
 # Modify original build-options to allow config file to be mounted in the docker container
 BUILD_OPTS="$(echo "${BUILD_OPTS:-}" | sed -E 's@\-c\s?([^ ]+)@-c /config@')"
 
+# FIXME: If it's a 64-bit machine, build the 64-bit image?
 # Check the arch of the machine we're running on. If it's 64-bit, use a 32-bit base image instead
 case "$(uname -m)" in
   x86_64|aarch64)
@@ -170,7 +171,7 @@ ${DOCKER} logs --timestamps "${CONTAINER_NAME}" &>deploy/build-docker.log
 
 ls -lah deploy
 
-# cleanup
+# Remove the build container
 if [ "${PRESERVE_CONTAINER}" != "1" ]; then
 	${DOCKER} rm -v "${CONTAINER_NAME}"
 fi

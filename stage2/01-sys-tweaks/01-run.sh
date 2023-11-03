@@ -48,7 +48,7 @@ systemctl enable resize2fs_once
 EOF
 fi
 
-# Not necessary?
+# TODO: Not necessary?
 #on_chroot <<EOF
 #for GRP in input spi i2c gpio; do
 #	groupadd -f -r "\$GRP"
@@ -78,3 +78,5 @@ usermod -aG sudo "${FIRST_USER_NAME}"
 echo "${FIRST_USER_NAME} ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/90-"${FIRST_USER_NAME}"-privileges >/dev/null
 chmod 0440 /etc/sudoers.d/90-"${FIRST_USER_NAME}"-privileges
 EOF
+
+cur
