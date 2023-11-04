@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 # shellcheck disable=SC2119
+# shellcheck disable=SC2086
 run_sub_stage()
 {
 	log "Begin ${SUB_STAGE_DIR}"

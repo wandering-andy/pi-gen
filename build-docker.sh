@@ -49,7 +49,7 @@ if test -z "${CONFIG_FILE}"; then
 	exit 1
 else
 	# shellcheck disable=SC1090
-	source ${CONFIG_FILE}
+	source "${CONFIG_FILE}"
 fi
 
 CONTAINER_NAME=${CONTAINER_NAME:-pigen_work}
@@ -131,6 +131,7 @@ if [[ "${binfmt_misc_required}" == "1" ]]; then
   fi
   if ! grep -q "^interpreter ${qemu_arm}" /proc/sys/fs/binfmt_misc/qemu-arm* ; then
     # Register qemu-arm for binfmt_misc
+    # shellcheck disable=SC2140
     reg="echo ':qemu-arm-rpi:M::"\
 "\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:"\
 "\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:"\
@@ -148,10 +149,10 @@ time ${DOCKER} run \
   --cap-add=ALL \
   -v /dev:/dev \
   -v /lib/modules:/lib/modules \
-  ${PIGEN_DOCKER_OPTS} \
+  "${PIGEN_DOCKER_OPTS}" \
   --volume "${CONFIG_FILE}":/config:ro \
   -e "GIT_HASH=${GIT_HASH}" \
-  $DOCKER_CMDLINE_POST \
+  "$DOCKER_CMDLINE_POST" \
   pi-gen \
   bash -e -o pipefail -c "
     dpkg-reconfigure qemu-user-static &&

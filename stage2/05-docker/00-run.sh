@@ -82,7 +82,7 @@ if ((LIBVERSION_MAJOR > 2)) || ((LIBVERSION_MAJOR == 2 && LIBVERSION_MINOR >= 4)
 else
 	echo "Something went wrong. Your system is using libseccomp2 v$(apt-cache policy libseccomp2 | sed -n 's/\s*Installed:\s*\(.*\)/\1/p'), and it needs to be v2.4 or greater for the ADSB containers to work properly."
 	echo "Please follow these instructions to fix this after this install script finishes: https://github.com/fredclausen/Buster-Docker-Fixes"
-	read -p "Press ENTER to continue."
+	read -rp "Press ENTER to continue."
 fi
 
 echo
