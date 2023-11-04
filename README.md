@@ -52,7 +52,7 @@ The following environment variables are supported:
    but you should use something else for a customized version.  Export files
    in stages may add suffixes to `IMG_NAME`.
 
-* `RELEASE` (Default: bookworm)
+* `RELEASE` (Default: ${DEB_VER})
 
    The release version to build images against. Valid values are any supported
    Debian release. However, since different releases will have different sets of
